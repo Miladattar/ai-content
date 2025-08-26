@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Template یافت نشد" }, { status: 404 })
     }
 
-    console.log("[v0] Template found:", template.name)
+    console.log("[v0] Template found:", template.title)
 
     // Get hooks and viral signal
     const hooks = await prisma.hook.findMany({ take: 3 })
@@ -71,11 +71,14 @@ export async function POST(request: NextRequest) {
 
     const run = await prisma.run.create({
       data: {
-        templateSlug: template.slug,
+        templateId: template.id,
         briefId: brief.id,
         kind: "GENERATE",
-        input: { ...inputs, technique },
+        inputs: { ...inputs, technique },
+        rawPrompt: `${systemPrompt}\n\n${userPrompt}`,
         output,
+        checks: validation,
+        score: validation.valid ? 100 : 0,
       },
     })
 
